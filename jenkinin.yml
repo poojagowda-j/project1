@@ -1,0 +1,40 @@
+---
+- hosts: java_server
+  tasks:
+    - name: installing_package
+      apt:
+        update_cache: yes
+        name: [ openjdk-17-jdk, wget ]
+        state: present
+      become: yes
+      become_user: root
+    - name: installing_jenkins
+      shell: wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      args:
+        creates: /usr/share/keyrings/jenkins-keyring.asc
+    - name: adding_the_dirctory
+      shell: echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" \
+        https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+        /etc/apt/sources.list.d/jenkins.list > /dev/null
+      args:
+        creates: /etc/apt/sources.list.d/jenkins.list
+    
+    # Install Jenkins
+    - name: Install Jenkins on Ubuntu
+      apt:
+        name: jenkins
+        state: present
+
+    # Start and Enable Jenkins Service
+    - name: Start and Enable Jenkins
+      systemd:
+        name: jenkins
+        enabled: yes
+        state: started
+          
+    # Open firewall for Jenkins (port 8080)
+    - name: Open firewall for Jenkins on Ubuntu
+      ufw:
+        rule: allow
+        port: "8080"
+        proto: tcp

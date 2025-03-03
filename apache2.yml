@@ -1,0 +1,25 @@
+---
+- hosts: python_server
+  become: yes  # Run as sudo/root
+  tasks:
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Start and Enable Apache2 Service
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Open Firewall Port 80 (HTTP)
+      ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
